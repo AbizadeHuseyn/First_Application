@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">First Application</string>
+    <string name="notes">Notlar</string>
+    <string name="tasks">Görevler</string>
+    <string name="search_hint">Notlarda ara</string>
+    <string name="header">Header</string>
+    <string name="edit_note_message">Take a note!</string>
 </resources>

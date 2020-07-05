@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class ActivityForNotes extends AppCompatActivity {
+public class ActivityNoteDetails extends AppCompatActivity {
 
     private EditText header;
     private EditText context;
@@ -15,12 +15,11 @@ public class ActivityForNotes extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_for_notes);
+        setContentView(R.layout.activity_note_details);
 
         header = findViewById(R.id.note_header);
         context = findViewById(R.id.note_context);
         date = findViewById(R.id.note_date);
-
 
         String header1 = "Header is not written";
         String context1 = "Context is not written";
@@ -29,20 +28,14 @@ public class ActivityForNotes extends AppCompatActivity {
         Bundle extras  = getIntent().getExtras();
 
         if(extras != null ){
-
             header1 = extras.getString("Header");
             context1 = extras.getString("Context");
             date1 = extras.getString("Date");
-
-
         }
 
         header.setText(header1);
         context.setText(context1);
         date.setText(date1);
-
-
     }
-
 
 }

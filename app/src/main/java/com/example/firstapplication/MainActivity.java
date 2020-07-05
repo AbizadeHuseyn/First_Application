@@ -1,10 +1,5 @@
 package com.example.firstapplication;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,17 +8,21 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
+import java.util.List;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewNotes;
     private FakeDatabase database;
     private EditText searchBar;
-    RecyclerNotesAdapter adapter;
-    private  RecyclerNotesAdapter.RecyclerViewClickListener listener;
+    private RecyclerNotesAdapter adapter;
+    private RecyclerViewClickListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,17 +32,15 @@ public class MainActivity extends AppCompatActivity  {
         initializeUI();
         initializeDatabase();
         configureRecyclerViewNotes();
-        searchLogic();
+        configureSearchLogic();
     }
 
-    private void initializeUI(){
-
+    private void initializeUI() {
         recyclerViewNotes = findViewById(R.id.recycler_view);
         searchBar = findViewById(R.id.search_bar);
-
     }
 
-    private void searchLogic(){
+    private void configureSearchLogic() {
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -56,65 +53,55 @@ public class MainActivity extends AppCompatActivity  {
             }
 
             @Override
-            public void afterTextChanged(Editable editable) {
-
-                filter(editable.toString());
-
+            public void afterTextChanged(final Editable editable) {
+                Runnable runnable = new Runnable() { //THIS IS MULTI THREADING
+                    @Override
+                    public void run() {
+                        List<Notes> filteredList = database.filter(editable.toString());
+                        updateListOfNotes(filteredList);
+                    }
+                };
+                runnable.run(); //execute defined asynchronous process
             }
         });
     }
 
-    private void filter(String text){
-        ArrayList<Notes>  filteredList = new ArrayList<>();
-
-        for(Notes note: database.getListOfNotes()){
-            if(note.getContext().toLowerCase().contains(text.toLowerCase())){
-                filteredList.add(note);
-            }
-
-        }
-
-        if(filteredList.size() == 0){
-            displayMessage();
-            adapter.submitList(database.getListOfNotes());
-            return;
-
-        }
-
-        adapter.filterList(filteredList);
-    }
-
-    private void displayMessage (){
+    private void displayMessage() {
         Toast.makeText(MainActivity.this, "enetered information is not found in any notes", LENGTH_SHORT).show();
     }
 
-    private void configureRecyclerViewNotes(){
-        adapter =  new RecyclerNotesAdapter(listener);
-        setOnClickListener();
-        recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
+    private void configureRecyclerViewNotes() {
+        configureClickListeners();
+        recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
 
+        adapter = new RecyclerNotesAdapter(listener);
         recyclerViewNotes.setAdapter(adapter);
-        adapter.submitList(database.getListOfNotes());
-
+        updateListOfNotes(database.getListOfNotes());
     }
 
-    private void setOnClickListener (){
-        listener = new RecyclerNotesAdapter.RecyclerViewClickListener() {
+    private void updateListOfNotes(List<Notes> listOfNotes) {
+        if (listOfNotes.isEmpty()) {
+            displayMessage();
+            return;
+        }
+        adapter.submitList(listOfNotes);
+    }
+
+    private void configureClickListeners() {
+        listener = new RecyclerViewClickListener() {
             @Override
             public void onClick(View v, int position) {
-                Intent intent = new Intent(getApplicationContext(), ActivityForNotes.class);
+                Intent intent = new Intent(getApplicationContext(), ActivityNoteDetails.class);
                 intent.putExtra("Header", database.getListOfNotes().get(position).getHeader());
                 intent.putExtra("Context", database.getListOfNotes().get(position).getContext());
                 intent.putExtra("Date", database.getListOfNotes().get(position).getDate());
                 startActivity(intent);
-
             }
         };
     }
 
-    private void initializeDatabase(){
+    private void initializeDatabase() {
         database = new FakeDatabase();
     }
-
 
 }

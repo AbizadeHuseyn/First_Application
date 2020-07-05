@@ -32,4 +32,17 @@ public class FakeDatabase {
     public List<Notes> getListOfNotes() {
         return listOfNotes;
     }
+
+    public ArrayList<Notes> filter(String text) {
+        ArrayList<Notes> filteredList = new ArrayList<>();
+
+        for (Notes note : listOfNotes) {
+            if (note.getContext().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(note);
+            }
+        }
+
+        return filteredList;
+    }
+
 }
